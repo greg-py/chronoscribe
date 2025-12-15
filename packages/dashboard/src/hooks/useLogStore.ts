@@ -11,6 +11,7 @@ import {
     type Source,
     type Filter,
     type AlertConfig,
+    type TimeRangeFilter,
     LogLevel,
     LOG_LEVEL_PRIORITY,
     DEFAULT_FILTER,
@@ -43,8 +44,12 @@ interface LogStoreState {
 
     setFilter: (filter: Partial<Filter>) => void;
     toggleSource: (sourceName: string) => void;
+    toggleExcludeSource: (sourceName: string) => void;
     setMinLevel: (level: LogLevel) => void;
     setSearchText: (text: string) => void;
+    setSearchMode: (mode: 'text' | 'regex') => void;
+    setSourceFilterMode: (mode: 'any' | 'all') => void;
+    setTimeRange: (range: Partial<TimeRangeFilter>) => void;
     clearFilter: () => void;
 
     setAlertConfig: (config: Partial<AlertConfig>) => void;
@@ -153,6 +158,39 @@ export const useLogStore = create<LogStoreState>((set, get) => ({
         }));
     },
 
+    setSearchMode: (mode) => {
+        set((state) => ({
+            filter: { ...state.filter, searchMode: mode },
+        }));
+    },
+
+    setSourceFilterMode: (mode) => {
+        set((state) => ({
+            filter: { ...state.filter, sourceFilterMode: mode },
+        }));
+    },
+
+    toggleExcludeSource: (sourceName) => {
+        set((state) => {
+            const current = state.filter.excludeSources;
+            const newExcludeSources = current.includes(sourceName)
+                ? current.filter((s) => s !== sourceName)
+                : [...current, sourceName];
+            return {
+                filter: { ...state.filter, excludeSources: newExcludeSources },
+            };
+        });
+    },
+
+    setTimeRange: (range) => {
+        set((state) => ({
+            filter: {
+                ...state.filter,
+                timeRange: { ...state.filter.timeRange, ...range },
+            },
+        }));
+    },
+
     clearFilter: () => {
         set({ filter: DEFAULT_FILTER });
     },
@@ -215,9 +253,37 @@ export function useFilteredLogs(): LogEntry[] {
     const filter = useLogStore((state) => state.filter);
 
     return logs.filter((log) => {
-        // Filter by sources
-        if (filter.sources.length > 0 && !filter.sources.includes(log.source)) {
+        // Time range filter (NEW)
+        if (filter.timeRange.enabled) {
+            const logTime = new Date(log.timestamp).getTime();
+            const now = Date.now();
+
+            if (filter.timeRange.type === 'relative' && filter.timeRange.last) {
+                const cutoff = now - (filter.timeRange.last * 60 * 1000);
+                if (logTime < cutoff) return false;
+            }
+
+            if (filter.timeRange.type === 'absolute') {
+                if (filter.timeRange.start && logTime < new Date(filter.timeRange.start).getTime()) {
+                    return false;
+                }
+                if (filter.timeRange.end && logTime > new Date(filter.timeRange.end).getTime()) {
+                    return false;
+                }
+            }
+        }
+
+        // Exclude sources filter (NEW)
+        if (filter.excludeSources.includes(log.source)) {
             return false;
+        }
+
+        // Include sources filter (ENHANCED with ANY/ALL logic)
+        if (filter.sources.length > 0) {
+            // For 'any' mode, log must match at least one source
+            // For 'all' mode, we treat it as single-source filter (since a log can only have one source)
+            const matchesInclude = filter.sources.includes(log.source);
+            if (!matchesInclude) return false;
         }
 
         // Filter by level
@@ -227,15 +293,28 @@ export function useFilteredLogs(): LogEntry[] {
             return false;
         }
 
-        // Filter by search text
+        // Search with regex support (ENHANCED)
         if (filter.searchText) {
-            const searchLower = filter.searchText.toLowerCase();
-            if (!log.content.toLowerCase().includes(searchLower)) {
-                return false;
+            if (filter.searchMode === 'regex') {
+                try {
+                    const regex = new RegExp(filter.searchText, 'i');
+                    if (!regex.test(log.content)) return false;
+                } catch {
+                    // Invalid regex, fall back to text search
+                    const searchLower = filter.searchText.toLowerCase();
+                    if (!log.content.toLowerCase().includes(searchLower)) {
+                        return false;
+                    }
+                }
+            } else {
+                const searchLower = filter.searchText.toLowerCase();
+                if (!log.content.toLowerCase().includes(searchLower)) {
+                    return false;
+                }
             }
         }
 
-        // Filter by regex
+        // Legacy regex filter (keep for backwards compatibility with alerts)
         if (filter.regex) {
             try {
                 const regex = new RegExp(filter.regex, 'i');

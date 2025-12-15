@@ -11,6 +11,7 @@ export {
     type LogEntry,
     type Source,
     type Filter,
+    type TimeRangeFilter,
     type AlertConfig,
     DEFAULT_FILTER,
     DEFAULT_ALERT_CONFIG,

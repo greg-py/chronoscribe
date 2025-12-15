@@ -1,10 +1,12 @@
 /**
- * @fileoverview Filter bar component
+ * @fileoverview Filter bar component with enhanced search and export
  */
 
+import { useState } from 'react';
 import { LogLevel } from '@logloom/shared';
-import { useLogStore, useUniqueSourceNames, useSourcesArray } from '../hooks/useLogStore';
+import { useLogStore, useUniqueSourceNames, useSourcesArray, useFilteredLogs } from '../hooks/useLogStore';
 import { SourceBadge } from './SourceBadge';
+import { exportLogs, type ExportFormat } from '../utils/export';
 
 // Default colors for sources without server-assigned colors
 const DEFAULT_COLORS = [
@@ -22,16 +24,33 @@ const LEVELS = [
     { level: LogLevel.ERROR, label: 'ERR' },
 ] as const;
 
+/**
+ * Time range presets for quick filtering.
+ */
+const TIME_RANGES = [
+    { label: 'All Time', value: '' },
+    { label: 'Last 5 min', value: '5' },
+    { label: 'Last 15 min', value: '15' },
+    { label: 'Last hour', value: '60' },
+    { label: 'Last 24h', value: '1440' },
+] as const;
+
 export function FilterBar() {
+    const [showExportMenu, setShowExportMenu] = useState(false);
+
+    // Store selectors
     const filter = useLogStore((state) => state.filter);
     const setSearchText = useLogStore((state) => state.setSearchText);
+    const setSearchMode = useLogStore((state) => state.setSearchMode);
     const setMinLevel = useLogStore((state) => state.setMinLevel);
     const toggleSource = useLogStore((state) => state.toggleSource);
+    const setTimeRange = useLogStore((state) => state.setTimeRange);
     const clearFilter = useLogStore((state) => state.clearFilter);
     const clearLogs = useLogStore((state) => state.clearLogs);
 
     const sources = useSourcesArray();
     const uniqueSourceNames = useUniqueSourceNames();
+    const filteredLogs = useFilteredLogs();
 
     // Create a color map for sources
     const sourceColorMap = new Map<string, string>();
@@ -44,6 +63,30 @@ export function FilterBar() {
         name,
         color: sourceColorMap.get(name) ?? DEFAULT_COLORS[index % DEFAULT_COLORS.length] ?? '#60A5FA',
     }));
+
+    // Export handlers
+    const handleExport = (format: ExportFormat) => {
+        exportLogs({
+            format,
+            logs: filteredLogs,
+            filters: filter,
+            includeMetadata: true,
+        });
+        setShowExportMenu(false);
+    };
+
+    // Time range handler
+    const handleTimeRangeChange = (value: string) => {
+        if (!value) {
+            setTimeRange({ enabled: false });
+        } else {
+            setTimeRange({
+                enabled: true,
+                type: 'relative',
+                last: parseInt(value, 10),
+            });
+        }
+    };
 
     return (
         <div className="filter-bar">
@@ -70,6 +113,27 @@ export function FilterBar() {
                     value={filter.searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                 />
+                <button
+                    className={`search-mode-toggle ${filter.searchMode === 'regex' ? 'search-mode-toggle--active' : ''}`}
+                    onClick={() => setSearchMode(filter.searchMode === 'text' ? 'regex' : 'text')}
+                    title={filter.searchMode === 'text' ? 'Enable regex search' : 'Disable regex search'}
+                >
+                    .*
+                </button>
+            </div>
+
+            <div className="filter-bar__time-range">
+                <select
+                    value={filter.timeRange.enabled && filter.timeRange.last ? filter.timeRange.last.toString() : ''}
+                    onChange={(e) => handleTimeRangeChange(e.target.value)}
+                    title="Filter by time range"
+                >
+                    {TIME_RANGES.map((range) => (
+                        <option key={range.value} value={range.value}>
+                            {range.label}
+                        </option>
+                    ))}
+                </select>
             </div>
 
             <div className="filter-bar__levels">
@@ -94,7 +158,44 @@ export function FilterBar() {
                 >
                     Reset
                 </button>
+
                 <div className="filter-bar__divider" />
+
+                {/* Export Dropdown */}
+                <div className="export-dropdown">
+                    <button
+                        className="export-dropdown__trigger"
+                        onClick={() => setShowExportMenu(!showExportMenu)}
+                        title="Export logs"
+                    >
+                        💾 Export
+                    </button>
+                    {showExportMenu && (
+                        <>
+                            <div
+                                className="export-dropdown__backdrop"
+                                onClick={() => setShowExportMenu(false)}
+                            />
+                            <div className="export-dropdown__menu">
+                                <button onClick={() => handleExport('json')}>
+                                    Export as JSON
+                                </button>
+                                <button onClick={() => handleExport('csv')}>
+                                    Export as CSV
+                                </button>
+                                <button onClick={() => handleExport('txt')}>
+                                    Export as Text
+                                </button>
+                                <div className="export-dropdown__info">
+                                    {filteredLogs.length} log{filteredLogs.length !== 1 ? 's' : ''}
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                <div className="filter-bar__divider" />
+
                 <button
                     className="filter-bar__clear-logs"
                     onClick={() => {

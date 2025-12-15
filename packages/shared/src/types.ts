@@ -71,11 +71,34 @@ export interface Source {
 }
 
 /**
+ * Time range filter configuration.
+ */
+export interface TimeRangeFilter {
+    /** Whether time filtering is enabled */
+    enabled: boolean;
+
+    /** Type of time range */
+    type: 'relative' | 'absolute';
+
+    /** For relative: number of minutes to look back */
+    last?: number;
+
+    /** For absolute: start time (ISO 8601) */
+    start?: string;
+
+    /** For absolute: end time (ISO 8601) */
+    end?: string;
+}
+
+/**
  * Filter configuration for the log timeline.
  */
 export interface Filter {
     /** Sources to include (empty = all sources) */
     sources: string[];
+
+    /** Sources to explicitly exclude */
+    excludeSources: string[];
 
     /** Minimum log level to display */
     minLevel: LogLevel;
@@ -83,9 +106,19 @@ export interface Filter {
     /** Text to search for (case-insensitive substring match) */
     searchText: string;
 
+    /** Search mode: text or regex */
+    searchMode: 'text' | 'regex';
+
     /** Optional regex pattern for advanced filtering */
     regex: string | null;
+
+    /** Source filter logic: match any or all */
+    sourceFilterMode: 'any' | 'all';
+
+    /** Time range filtering */
+    timeRange: TimeRangeFilter;
 }
+
 
 /**
  * Alert configuration for pattern-based notifications.
@@ -109,9 +142,16 @@ export interface AlertConfig {
  */
 export const DEFAULT_FILTER: Filter = {
     sources: [],
+    excludeSources: [],
     minLevel: LogLevel.DEBUG,
     searchText: '',
+    searchMode: 'text',
     regex: null,
+    sourceFilterMode: 'any',
+    timeRange: {
+        enabled: false,
+        type: 'relative',
+    },
 };
 
 /**
