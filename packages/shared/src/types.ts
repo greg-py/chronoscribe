@@ -48,6 +48,12 @@ export interface LogEntry {
 
     /** Original unprocessed log line */
     raw: string;
+
+    /** Parsed timestamp from log content (if found) */
+    originalTimestamp?: string;
+
+    /** Format of the original timestamp */
+    timestampFormat?: string;
 }
 
 /**
@@ -119,6 +125,23 @@ export interface Filter {
     timeRange: TimeRangeFilter;
 }
 
+
+/**
+ * Bookmark with optional annotation.
+ */
+export interface Bookmark {
+    /** ID of the bookmarked log */
+    logId: string;
+
+    /** Optional annotation/note */
+    note: string;
+
+    /** When this bookmark was created */
+    createdAt: string;
+
+    /** Optional color tag for organization */
+    color?: 'red' | 'yellow' | 'green' | 'blue' | 'purple';
+}
 
 /**
  * Alert configuration for pattern-based notifications.

@@ -12,6 +12,7 @@ export {
     type Source,
     type Filter,
     type TimeRangeFilter,
+    type Bookmark,
     type AlertConfig,
     DEFAULT_FILTER,
     DEFAULT_ALERT_CONFIG,

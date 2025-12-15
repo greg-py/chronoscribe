@@ -15,23 +15,6 @@ import { LogDetailsPanel } from './components/LogDetailsPanel';
 import { playAlertSound, showNotification, matchesAlertPattern } from './utils/notifications';
 
 /**
- * Get status indicator dot class.
- */
-function getStatusDotClass(status: ConnectionStatus): string {
-    switch (status) {
-        case 'connected':
-            return 'header__status-dot';
-        case 'connecting':
-        case 'reconnecting':
-            return 'header__status-dot'; // Could add animation class
-        case 'disconnected':
-            return 'header__status-dot header__status-dot--disconnected';
-        default:
-            return 'header__status-dot header__status-dot--disconnected';
-    }
-}
-
-/**
  * Get status text.
  */
 function getStatusText(status: ConnectionStatus, attempts: number): string {
@@ -137,26 +120,15 @@ function App() {
         <div className="app">
             {/* Header */}
             <header className="header">
-                <div className="header__logo">
-                    <span className="header__logo-icon">🪵</span>
-                    <span>LogLoom</span>
-                </div>
+                <h1 className="header__title">LogLoom</h1>
                 <div className="header__status">
-                    <span className={getStatusDotClass(status)} />
+                    <span className={`status-indicator ${status === 'connected' ? 'status-indicator--connected' : ''}`} />
                     <span>{getStatusText(status, reconnectAttempts)}</span>
                     {status === 'disconnected' && (
                         <button
                             onClick={reconnect}
-                            style={{
-                                marginLeft: '8px',
-                                padding: '4px 8px',
-                                fontSize: '12px',
-                                cursor: 'pointer',
-                                background: 'var(--color-bg-tertiary)',
-                                border: '1px solid var(--color-border)',
-                                borderRadius: '4px',
-                                color: 'var(--color-text-secondary)',
-                            }}
+                            className="toggle-button"
+                            style={{ marginLeft: '12px' }}
                         >
                             Retry
                         </button>

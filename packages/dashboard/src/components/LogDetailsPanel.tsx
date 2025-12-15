@@ -1,196 +1,204 @@
 /**
- * @fileoverview Log details slide-out panel
+ * @fileoverview Professional log details panel
  */
 
-import { useEffect, useCallback } from 'react';
-import type { LogEntry } from '@logloom/shared';
-import { useLogStore } from '../hooks/useLogStore';
-import { tryParseJSON, formatDetailTimestamp, isStackTrace, parseStackTrace } from '../utils/stackTrace';
+import { useCallback, useEffect } from "react";
+import type { LogEntry } from "@logloom/shared";
+import { formatDetailTimestamp } from "../utils/timeUtils";
+import { useLogStore } from "../hooks/useLogStore";
+import {
+  CloseIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CopyIcon,
+  CheckCircleIcon,
+} from "./Icons";
+import { useState } from "react";
 
 interface LogDetailsPanelProps {
-    log: LogEntry;
-    onClose: () => void;
+  log: LogEntry;
+  onClose: () => void;
 }
 
 export function LogDetailsPanel({ log, onClose }: LogDetailsPanelProps) {
-    const selectNextLog = useLogStore((state) => state.selectNextLog);
-    const selectPreviousLog = useLogStore((state) => state.selectPreviousLog);
+  const [copiedSection, setCopiedSection] = useState<string | null>(null);
+  const selectNextLog = useLogStore((state) => state.selectNextLog);
+  const selectPreviousLog = useLogStore((state) => state.selectPreviousLog);
+  const logs = useLogStore((state) => state.logs);
 
-    // Keyboard shortcuts
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') {
-                onClose();
-            } else if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                selectNextLog();
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                selectPreviousLog();
-            }
-        };
+  const currentIndex = logs.findIndex((l) => l.id === log.id);
+  const hasNext = currentIndex < logs.length - 1;
+  const hasPrev = currentIndex > 0;
 
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onClose, selectNextLog, selectPreviousLog]);
+  const copyToClipboard = useCallback(async (text: string, section: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedSection(section);
+      setTimeout(() => setCopiedSection(null), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  }, []);
 
-    // Try to parse as JSON
-    const jsonResult = tryParseJSON(log.content);
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      } else if (e.key === "ArrowDown" && hasNext) {
+        selectNextLog();
+      } else if (e.key === "ArrowUp" && hasPrev) {
+        selectPreviousLog();
+      }
+    };
 
-    // Check if it's a stack trace
-    const hasStackTrace = isStackTrace(log.content);
-    const stackTraceLines = hasStackTrace ? parseStackTrace(log.content) : [];
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, hasNext, hasPrev, selectNextLog, selectPreviousLog]);
 
-    // Copy handlers
-    const copyContent = useCallback(() => {
-        navigator.clipboard.writeText(log.content).then(() => {
-            console.log('[LogLoom] Content copied to clipboard');
-        });
-    }, [log.content]);
+  // Try to parse JSON
+  let jsonContent = null;
+  try {
+    const parsed = JSON.parse(log.content);
+    if (typeof parsed === "object" && parsed !== null) {
+      jsonContent = JSON.stringify(parsed, null, 2);
+    }
+  } catch {
+    // Not JSON
+  }
 
-    const copyRaw = useCallback(() => {
-        navigator.clipboard.writeText(log.raw).then(() => {
-            console.log('[LogLoom] Raw log copied to clipboard');
-        });
-    }, [log.raw]);
+  return (
+    <>
+      <div className="backdrop" onClick={onClose} />
+      <div className="details-panel">
+        <div className="details-panel__header">
+          <h2 className="details-panel__title">Log Details</h2>
+          <button
+            className="details-panel__close"
+            onClick={onClose}
+            title="Close (Esc)"
+          >
+            <CloseIcon size={20} />
+          </button>
+        </div>
 
-    const copyJSON = useCallback(() => {
-        if (jsonResult.formatted) {
-            navigator.clipboard.writeText(jsonResult.formatted).then(() => {
-                console.log('[LogLoom] Formatted JSON copied to clipboard');
-            });
-        }
-    }, [jsonResult.formatted]);
-
-    return (
-        <>
-            <div className="log-details-panel__backdrop" onClick={onClose} />
-            <aside className="log-details-panel">
-                <header className="log-details-panel__header">
-                    <h2>Log Details</h2>
-                    <button
-                        className="log-details-panel__close"
-                        onClick={onClose}
-                        title="Close (Esc)"
-                    >
-                        ×
-                    </button>
-                </header>
-
-                <div className="log-details-panel__content">
-                    {/* Metadata Section */}
-                    <section className="log-details-panel__section">
-                        <h3>Metadata</h3>
-                        <dl className="log-details-panel__metadata">
-                            <div className="log-details-panel__metadata-row">
-                                <dt>Timestamp</dt>
-                                <dd>{formatDetailTimestamp(log.timestamp)}</dd>
-                            </div>
-                            <div className="log-details-panel__metadata-row">
-                                <dt>Source</dt>
-                                <dd>
-                                    <span className="source-badge" style={{ fontSize: '13px' }}>
-                                        {log.source}
-                                    </span>
-                                </dd>
-                            </div>
-                            <div className="log-details-panel__metadata-row">
-                                <dt>Level</dt>
-                                <dd>
-                                    <span className={`level-badge level-badge--${log.level.toLowerCase()}`}>
-                                        {log.level}
-                                    </span>
-                                </dd>
-                            </div>
-                            <div className="log-details-panel__metadata-row">
-                                <dt>ID</dt>
-                                <dd>
-                                    <code style={{ fontSize: '11px', color: 'var(--color-text-muted)' }}>
-                                        {log.id}
-                                    </code>
-                                </dd>
-                            </div>
-                        </dl>
-                    </section>
-
-                    {/* Content Section */}
-                    <section className="log-details-panel__section">
-                        <div className="log-details-panel__section-header">
-                            <h3>Content</h3>
-                            <button
-                                className="log-details-panel__copy-btn"
-                                onClick={copyContent}
-                                title="Copy content"
-                            >
-                                Copy
-                            </button>
-                        </div>
-
-                        {jsonResult.success ? (
-                            <>
-                                <button
-                                    className="log-details-panel__copy-btn"
-                                    onClick={copyJSON}
-                                    title="Copy formatted JSON"
-                                    style={{ marginBottom: '8px' }}
-                                >
-                                    Copy Formatted
-                                </button>
-                                <pre className="log-details-panel__json">{jsonResult.formatted}</pre>
-                            </>
-                        ) : hasStackTrace ? (
-                            <div className="log-details-panel__stack-trace">
-                                {stackTraceLines.map((line, index) => (
-                                    <div
-                                        key={index}
-                                        className={`stack-trace-line ${line.isError ? 'stack-trace-line--error' : ''
-                                            }`}
-                                        style={{ paddingLeft: `${line.indent * 16}px` }}
-                                    >
-                                        {line.text}
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <pre className="log-details-panel__pre">{log.content}</pre>
-                        )}
-                    </section>
-
-                    {/* Raw Log Section */}
-                    {log.raw !== log.content && (
-                        <section className="log-details-panel__section">
-                            <div className="log-details-panel__section-header">
-                                <h3>Raw Log</h3>
-                                <button
-                                    className="log-details-panel__copy-btn"
-                                    onClick={copyRaw}
-                                    title="Copy raw log"
-                                >
-                                    Copy
-                                </button>
-                            </div>
-                            <pre className="log-details-panel__pre">{log.raw}</pre>
-                        </section>
-                    )}
+        <div className="details-panel__content">
+          {/* Metadata Section */}
+          <section className="details-panel__section">
+            <h3 className="details-panel__section-title">Metadata</h3>
+            <div className="details-panel__metadata">
+              <div className="details-panel__metadata-row">
+                <span className="details-panel__metadata-label">Timestamp</span>
+                <span className="details-panel__metadata-value">
+                  {formatDetailTimestamp(log.timestamp)}
+                </span>
+              </div>
+              {log.originalTimestamp && (
+                <div className="details-panel__metadata-row">
+                  <span className="details-panel__metadata-label">
+                    Original Time
+                  </span>
+                  <span className="details-panel__metadata-value">
+                    {formatDetailTimestamp(log.originalTimestamp)}
+                    {log.timestampFormat && ` (${log.timestampFormat})`}
+                  </span>
                 </div>
+              )}
+              <div className="details-panel__metadata-row">
+                <span className="details-panel__metadata-label">Source</span>
+                <span className="details-panel__metadata-value">
+                  {log.source}
+                </span>
+              </div>
+              <div className="details-panel__metadata-row">
+                <span className="details-panel__metadata-label">Level</span>
+                <span className="details-panel__metadata-value">
+                  {log.level}
+                </span>
+              </div>
+              <div className="details-panel__metadata-row">
+                <span className="details-panel__metadata-label">Log ID</span>
+                <span className="details-panel__metadata-value">{log.id}</span>
+              </div>
+            </div>
+          </section>
 
-                <footer className="log-details-panel__footer">
-                    <button
-                        className="log-details-panel__nav-btn"
-                        onClick={selectPreviousLog}
-                        title="Previous log (↑)"
-                    >
-                        ← Previous
-                    </button>
-                    <button
-                        className="log-details-panel__nav-btn"
-                        onClick={selectNextLog}
-                        title="Next log (↓)"
-                    >
-                        Next →
-                    </button>
-                </footer>
-            </aside>
-        </>
-    );
+          {/* Content Section */}
+          <section className="details-panel__section">
+            <div className="details-panel__section-actions">
+              <h3 className="details-panel__section-title">Content</h3>
+              <button
+                className="details-panel__copy-btn"
+                onClick={() => copyToClipboard(log.content, "content")}
+                title="Copy content"
+              >
+                {copiedSection === "content" ? (
+                  <>
+                    <CheckCircleIcon size={14} />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <CopyIcon size={14} />
+                    Copy
+                  </>
+                )}
+              </button>
+            </div>
+            <div className="details-panel__code-block">
+              {jsonContent || log.content}
+            </div>
+          </section>
+
+          {/* Raw Log Section */}
+          <section className="details-panel__section">
+            <div className="details-panel__section-actions">
+              <h3 className="details-panel__section-title">Raw Log</h3>
+              <button
+                className="details-panel__copy-btn"
+                onClick={() => copyToClipboard(log.raw, "raw")}
+                title="Copy raw log"
+              >
+                {copiedSection === "raw" ? (
+                  <>
+                    <CheckCircleIcon size={14} />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <CopyIcon size={14} />
+                    Copy
+                  </>
+                )}
+              </button>
+            </div>
+            <div className="details-panel__code-block">{log.raw}</div>
+          </section>
+        </div>
+
+        <div className="details-panel__footer">
+          <button
+            className="details-panel__nav-btn"
+            onClick={selectPreviousLog}
+            disabled={!hasPrev}
+            title="Previous log (↑)"
+          >
+            <ChevronLeftIcon size={16} />
+            Previous
+          </button>
+          <span className="details-panel__position">
+            {currentIndex + 1} of {logs.length}
+          </span>
+          <button
+            className="details-panel__nav-btn"
+            onClick={selectNextLog}
+            disabled={!hasNext}
+            title="Next log (↓)"
+          >
+            Next
+            <ChevronRightIcon size={16} />
+          </button>
+        </div>
+      </div>
+    </>
+  );
 }
