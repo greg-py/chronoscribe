@@ -7,10 +7,11 @@
 import { useCallback, useRef } from 'react';
 import { MessageType, type ServerMessage } from '@logloom/shared';
 import { useWebSocket, type ConnectionStatus } from './hooks/useWebSocket';
-import { useLogStore } from './hooks/useLogStore';
+import { useLogStore, useSelectedLog } from './hooks/useLogStore';
 import { FilterBar } from './components/FilterBar';
 import { Timeline } from './components/Timeline';
 import { AlertConfig } from './components/AlertConfig';
+import { LogDetailsPanel } from './components/LogDetailsPanel';
 import { playAlertSound, showNotification, matchesAlertPattern } from './utils/notifications';
 
 /**
@@ -55,8 +56,10 @@ function App() {
     const addSource = useLogStore((state) => state.addSource);
     const removeSource = useLogStore((state) => state.removeSource);
     const setSources = useLogStore((state) => state.setSources);
+    const setSelectedLog = useLogStore((state) => state.setSelectedLog);
     const logs = useLogStore((state) => state.logs);
     const alertConfig = useLogStore((state) => state.alertConfig);
+    const selectedLog = useSelectedLog();
 
     // Track last alert time to debounce
     const lastAlertTimeRef = useRef(0);
@@ -179,6 +182,14 @@ function App() {
                     <span>LogLoom v0.1.0</span>
                 </div>
             </footer>
+
+            {/* Log details panel */}
+            {selectedLog && (
+                <LogDetailsPanel
+                    log={selectedLog}
+                    onClose={() => setSelectedLog(null)}
+                />
+            )}
         </div>
     );
 }

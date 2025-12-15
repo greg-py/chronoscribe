@@ -30,6 +30,7 @@ interface LogStoreState {
     filter: Filter;
     alertConfig: AlertConfig;
     isPaused: boolean;
+    selectedLogId: string | null;
 
     // Actions
     addLog: (log: LogEntry) => void;
@@ -49,6 +50,10 @@ interface LogStoreState {
     setAlertConfig: (config: Partial<AlertConfig>) => void;
 
     setPaused: (paused: boolean) => void;
+
+    setSelectedLog: (logId: string | null) => void;
+    selectNextLog: () => void;
+    selectPreviousLog: () => void;
 }
 
 /**
@@ -61,6 +66,7 @@ export const useLogStore = create<LogStoreState>((set, get) => ({
     filter: DEFAULT_FILTER,
     alertConfig: DEFAULT_ALERT_CONFIG,
     isPaused: false,
+    selectedLogId: null,
 
     // Log actions
     addLog: (log) => {
@@ -162,6 +168,43 @@ export const useLogStore = create<LogStoreState>((set, get) => ({
     setPaused: (paused) => {
         set({ isPaused: paused });
     },
+
+    // Selection actions
+    setSelectedLog: (logId) => {
+        set({ selectedLogId: logId });
+    },
+
+    selectNextLog: () => {
+        const state = get();
+        const { logs, selectedLogId } = state;
+        if (logs.length === 0) return;
+
+        if (!selectedLogId) {
+            set({ selectedLogId: logs[0]?.id || null });
+            return;
+        }
+
+        const currentIndex = logs.findIndex(log => log.id === selectedLogId);
+        if (currentIndex < logs.length - 1) {
+            set({ selectedLogId: logs[currentIndex + 1]?.id || null });
+        }
+    },
+
+    selectPreviousLog: () => {
+        const state = get();
+        const { logs, selectedLogId } = state;
+        if (logs.length === 0) return;
+
+        if (!selectedLogId) {
+            set({ selectedLogId: logs[logs.length - 1]?.id || null });
+            return;
+        }
+
+        const currentIndex = logs.findIndex(log => log.id === selectedLogId);
+        if (currentIndex > 0) {
+            set({ selectedLogId: logs[currentIndex - 1]?.id || null });
+        }
+    },
 }));
 
 /**
@@ -222,4 +265,13 @@ export function useSourcesArray(): Source[] {
 export function useUniqueSourceNames(): string[] {
     const logs = useLogStore((state) => state.logs);
     return [...new Set(logs.map((log) => log.source))];
+}
+
+/**
+ * Selector: Get selected log entry.
+ */
+export function useSelectedLog(): LogEntry | null {
+    const logs = useLogStore((state) => state.logs);
+    const selectedLogId = useLogStore((state) => state.selectedLogId);
+    return logs.find(log => log.id === selectedLogId) || null;
 }
