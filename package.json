@@ -41,12 +41,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_USERNAME/chronoscribe"
+    "url": "https://github.com/greg-py/chronoscribe"
   },
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/chronoscribe/issues"
+    "url": "https://github.com/greg-py/chronoscribe/issues"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/chronoscribe#readme",
+  "homepage": "https://github.com/greg-py/chronoscribe#readme",
   "keywords": [
     "logging",
     "developer-tools",
