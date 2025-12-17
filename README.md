@@ -1,4 +1,10 @@
-# Chronoscribe 🪵
+# Chronoscribe
+
+[![npm version](https://img.shields.io/npm/v/chronoscribe.svg)](https://www.npmjs.com/package/chronoscribe)
+[![npm downloads](https://img.shields.io/npm/dm/chronoscribe.svg)](https://www.npmjs.com/package/chronoscribe)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/node/v/chronoscribe.svg)](https://nodejs.org/)
+[![GitHub](https://img.shields.io/github/stars/greg-py/chronoscribe?style=social)](https://github.com/greg-py/chronoscribe)
 
 > A Unified Local-Dev Log Aggregator
 
@@ -8,16 +14,16 @@
 
 ![Chronoscribe Architecture](https://via.placeholder.com/800x300/161b22/58a6ff?text=Frontend+%7C+Backend+%7C+Database+→+Chronoscribe+Dashboard)
 
-## ✨ Features
+## Features
 
-- **📊 Unified Timeline**: See logs from all services interleaved chronologically
-- **🔍 Powerful Filtering**: Filter by source, log level, or text search
-- **🎨 Source Color Coding**: Each source gets a distinct color for easy identification
-- **🔔 Regex Alerting**: Get sound or browser notifications when patterns match
-- **⚡ Virtualized List**: Handle thousands of logs without performance issues
-- **🌙 Dark Theme**: Easy on the eyes for long debugging sessions
+- **Unified Timeline**: See logs from all services interleaved chronologically
+- **Powerful Filtering**: Filter by source, log level, or text search
+- **Source Color Coding**: Each source gets a distinct color for easy identification
+- **Regex Alerting**: Get sound or browser notifications when patterns match
+- **Virtualized List**: Handle thousands of logs without performance issues
+- **Dark Theme**: Easy on the eyes for long debugging sessions
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Run with npx (No Installation Required)
 
@@ -46,7 +52,7 @@ Go to the dashboard and see your logs aggregated in real-time!
 
 ---
 
-## 📦 Installation (Optional)
+## Installation (Optional)
 
 You can install Chronoscribe globally for easier access:
 
@@ -55,12 +61,13 @@ npm install -g chronoscribe
 ```
 
 Then use it directly:
+
 ```bash
 chronoscribe --serve
 npm start | chronoscribe --name my-app
 ```
 
-## 🛠️ CLI Usage
+## CLI Usage
 
 ```bash
 chronoscribe [options]
@@ -88,7 +95,7 @@ docker logs -f redis | chronoscribe -n redis -c "#FF6B6B"
 tail -f /var/log/app.log | chronoscribe -n backend
 ```
 
-## 🎮 Dashboard Features
+## Dashboard Features
 
 ### Filtering
 
@@ -100,8 +107,8 @@ tail -f /var/log/app.log | chronoscribe -n backend
 ### Alerting
 
 1. Enter a regex pattern in the alert bar (e.g., `ERROR|Exception`)
-2. Toggle 🔊 Sound for audio alerts
-3. Toggle 📢 Notify for browser notifications
+2. Toggle Sound for audio alerts
+3. Toggle Notify for browser notifications
 4. Enable alerts with the Active button
 
 ### Auto-Scroll
@@ -110,7 +117,7 @@ tail -f /var/log/app.log | chronoscribe -n backend
 - Scroll up to pause auto-scroll
 - Click "Resume auto-scroll" to catch up
 
-## 🔧 Development
+## Development
 
 ### Project Structure
 
