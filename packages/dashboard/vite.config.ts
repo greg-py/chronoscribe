@@ -10,8 +10,8 @@ export default defineConfig({
         port: 3211,
     },
     build: {
-        // Resolve relative to CWD (packages/dashboard)
-        outDir: path.resolve(process.cwd(), '../server/dist/dashboard'),
+        // Build to root dist/dashboard for bundled CLI
+        outDir: path.resolve(process.cwd(), '../../dist/dashboard'),
         emptyOutDir: true,
     },
 });

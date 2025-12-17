@@ -137,7 +137,7 @@ chronoscribe/
 npm run build
 ```
 
-The build process bundles the React dashboard into the Server package, which is then utilized by the CLI to provide a standalone experience.
+The build process bundles the CLI with tsup, then builds the React dashboard to the dist folder, providing a standalone experience via `npx chronoscribe --serve`.
 
 ## 📄 License
 

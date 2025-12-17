@@ -1,6 +1,6 @@
 {
   "name": "chronoscribe",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
   "description": "A unified local-dev log aggregator",
   "bin": {
@@ -16,8 +16,8 @@
   ],
   "scripts": {
     "dev": "concurrently -n server,dashboard -c blue,green \"npm run dev -w @chronoscribe/server\" \"npm run dev -w @chronoscribe/dashboard\"",
-    "build:packages": "npm run build -w @chronoscribe/shared && npm run build -w @chronoscribe/server && npm run build -w @chronoscribe/dashboard",
-    "build": "npm run build:packages && tsup",
+    "build:cli": "npm run build -w @chronoscribe/shared && npm run build -w @chronoscribe/server && tsup",
+    "build": "npm run build:cli && npm run build -w @chronoscribe/dashboard",
     "prepublishOnly": "npm run build",
     "clean": "npm run clean --workspaces && rm -rf dist",
     "test": "npm run test --workspaces",

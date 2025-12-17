@@ -31,18 +31,9 @@ function openBrowser(url: string): void {
  * Find the dashboard directory.
  */
 function getDashboardPath(): string {
-    // Current location: packages/cli/dist/index.js (or similar)
-    // Target: packages/server/dist/dashboard
-
-    const currentDir = __dirname;
-
-    // Check standard monorepo build structure
-    const monorepoPath = path.resolve(currentDir, '../../server/dist/dashboard');
-
-    // In a bundled scenario, it might be different. 
-    // Ideally we'd package dashboard assets *with* the CLI or inside the server pkg.
-    // For now, assume monorepo structure as per plan.
-    return monorepoPath;
+    // In the bundled distribution, __dirname is the root dist/ folder
+    // and the dashboard is at dist/dashboard/ (sibling to dist/index.js)
+    return path.resolve(__dirname, 'dashboard');
 }
 
 /**
