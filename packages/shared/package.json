@@ -1,8 +1,8 @@
 {
-    "name": "@logloom/shared",
+    "name": "@chronoscribe/shared",
     "version": "0.1.0",
     "private": true,
-    "description": "Shared types and protocol for LogLoom",
+    "description": "Shared types and protocol for Chronoscribe",
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",

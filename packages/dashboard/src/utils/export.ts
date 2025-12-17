@@ -2,7 +2,7 @@
  * @fileoverview Log export utilities for JSON, CSV, and plain text formats
  */
 
-import type { LogEntry, Filter } from "@logloom/shared";
+import type { LogEntry, Filter } from "@chronoscribe/shared";
 
 export type ExportFormat = "json" | "csv" | "txt";
 
@@ -43,7 +43,7 @@ export function exportLogs(options: ExportOptions): void {
     const filename = generateFilename(format);
     downloadBlob(blob, filename);
   } catch (error) {
-    console.error("[LogLoom] Export failed:", error);
+    console.error("[Chronoscribe] Export failed:", error);
     alert("Export failed. Please check console for details.");
   }
 }
@@ -91,7 +91,7 @@ function generateCSVExport(logs: LogEntry[], includeMetadata: boolean): string {
 
   // Header
   if (includeMetadata) {
-    lines.push(`# LogLoom Export - ${new Date().toISOString()}`);
+    lines.push(`# Chronoscribe Export - ${new Date().toISOString()}`);
     lines.push(`# Total Logs: ${logs.length}`);
     lines.push("");
   }
@@ -124,7 +124,7 @@ function generateTextExport(
 
   if (includeMetadata) {
     lines.push("=".repeat(80));
-    lines.push("LogLoom Export");
+    lines.push("Chronoscribe Export");
     lines.push("=".repeat(80));
     lines.push("");
     lines.push(`Exported At: ${new Date().toLocaleString()}`);
@@ -215,7 +215,7 @@ function generateFilename(format: ExportFormat): string {
     .replace(/:/g, "-")
     .replace(/\..+/, ""); // Remove milliseconds
 
-  return `logloom-export-${timestamp}.${format}`;
+  return `chronoscribe-export-${timestamp}.${format}`;
 }
 
 /**

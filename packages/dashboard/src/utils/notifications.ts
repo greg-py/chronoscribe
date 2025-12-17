@@ -1,5 +1,5 @@
 /**
- * @fileoverview Notification utilities for LogLoom Dashboard
+ * @fileoverview Notification utilities for Chronoscribe Dashboard
  *
  * Handles browser notifications and audio alerts for pattern matches.
  */
@@ -105,7 +105,7 @@ export function showNotification(title: string, body: string): void {
     new Notification(title, {
       body,
       icon: "🪵",
-      tag: "logloom-alert",
+      tag: "chronoscribe-alert",
       requireInteraction: false,
     });
   } catch (error) {

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Stdin reader for LogLoom CLI
+ * @fileoverview Stdin reader for Chronoscribe CLI
  * 
  * Reads log lines from stdin with proper stream handling and
  * backpressure management.
@@ -25,8 +25,8 @@ export function readStdin(
 ): () => void {
     // Check if stdin is a TTY (interactive terminal)
     if (process.stdin.isTTY) {
-        console.log('[LogLoom] Interactive mode: Type log lines and press Enter.');
-        console.log('[LogLoom] Press Ctrl+D to exit.\n');
+        console.log('[Chronoscribe] Interactive mode: Type log lines and press Enter.');
+        console.log('[Chronoscribe] Press Ctrl+D to exit.\n');
     }
 
     const rl = readline.createInterface({

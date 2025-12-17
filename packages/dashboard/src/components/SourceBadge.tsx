@@ -2,7 +2,7 @@
  * @fileoverview Source badge component
  */
 
-import type { Source } from '@logloom/shared';
+import type { Source } from '@chronoscribe/shared';
 
 interface SourceBadgeProps {
     source: Source | { name: string; color: string };

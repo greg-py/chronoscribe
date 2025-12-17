@@ -1,12 +1,12 @@
 /**
- * @fileoverview CLI argument parsing for LogLoom
+ * @fileoverview CLI argument parsing for Chronoscribe
  * 
  * Handles command-line arguments using Commander.js with validation
  * and helpful defaults.
  */
 
 import { Command } from 'commander';
-import { SERVER_DEFAULTS } from '@logloom/shared';
+import { SERVER_DEFAULTS } from '@chronoscribe/shared';
 
 /**
  * Parsed CLI options.
@@ -20,74 +20,71 @@ export interface CliOptions {
     color?: string;
     /** Custom regex pattern for log level detection */
     levelPattern?: string;
-}
-
-/**
- * Create and configure the CLI program.
- */
-export function createProgram(): Command {
-    const program = new Command();
-
-    program
-        .name('logloom')
-        .description('Pipe logs to the LogLoom dashboard')
-        .version('0.1.0')
-        .requiredOption(
-            '-n, --name <name>',
-            'Source identifier (e.g., "frontend", "api", "database")'
-        )
-        .option(
-            '-s, --server <url>',
-            'LogLoom server URL',
-            `ws://localhost:${SERVER_DEFAULTS.WS_PORT}`
-        )
-        .option(
-            '-c, --color <color>',
-            'Preferred badge color (CSS color value)'
-        )
-        .option(
-            '--level-pattern <regex>',
-            'Custom regex for log level detection (must have named group "level")'
-        )
-        .addHelpText('after', `
-Examples:
-  $ npm start | logloom --name frontend
-  $ docker logs -f mydb | logloom --name database --color "#FF6B6B"
-  $ tail -f /var/log/app.log | logloom -n backend -s ws://192.168.1.100:3210
-    `);
-
-    return program;
+    // Server mode options
+    serve: boolean;
+    open: boolean;
+    wsPort: number;
+    httpPort: number;
 }
 
 /**
  * Parse CLI arguments and return options.
  */
 export function parseArgs(argv: string[] = process.argv): CliOptions {
-    const program = createProgram();
-    program.parse(argv);
+    const program = new Command();
+    const defaultServerUrl = `ws://localhost:${SERVER_DEFAULTS.WS_PORT}`;
 
-    const options = program.opts<CliOptions>();
+    program
+        .name('chronoscribe')
+        .description('Unified Local-Dev Log Aggregator')
+        .version('0.1.0')
+        // Client options
+        .option('-n, --name <name>', 'Source name (default: "cli")')
+        .option('-c, --color <color>', 'Source color (hex code or name)')
+        .option('-s, --server <url>', 'Server URL', defaultServerUrl)
+        .option(
+            '--level-pattern <regex>',
+            'Custom regex for log level detection (must have named group "level")'
+        )
+        // Server mode options
+        .option('-S, --serve', 'Start the Chronoscribe server and dashboard', false)
+        .option('--no-open', 'Do not open the dashboard in the browser automatically', true)
+        .option('--ws-port <port>', 'WebSocket server port', String(SERVER_DEFAULTS.WS_PORT))
+        .option('--http-port <port>', 'Dashboard HTTP server port', '3211')
+        .addHelpText('after', `
+Examples:
+  $ npm start | chronoscribe --name frontend
+  $ docker logs -f mydb | chronoscribe --name database --color "#FF6B6B"
+  $ chronoscribe --serve
+    `);
+
+    program.parse(argv);
+    const opts = program.opts();
+
+    // Default name if not provided
+    let name = opts.name;
+    if (!name && !opts.serve) {
+        name = `cli-${Math.floor(Math.random() * 1000)}`;
+    }
 
     // Validate server URL
     try {
-        new URL(options.server);
+        new URL(opts.server);
     } catch {
-        console.error(`Error: Invalid server URL: ${options.server}`);
+        console.error(`Error: Invalid server URL: ${opts.server}`);
         process.exit(1);
     }
 
-    // Validate level pattern if provided
-    if (options.levelPattern) {
-        try {
-            const regex = new RegExp(options.levelPattern);
-            if (!options.levelPattern.includes('?<level>')) {
-                console.warn('Warning: --level-pattern should contain a named group "level"');
-            }
-        } catch {
-            console.error(`Error: Invalid regex pattern: ${options.levelPattern}`);
-            process.exit(1);
-        }
-    }
-
-    return options;
+    return {
+        name: name || 'cli',
+        color: opts.color,
+        server: opts.server,
+        levelPattern: opts.levelPattern,
+        serve: opts.serve,
+        open: opts.open, // Logic inverted in 'program' definition? 'no-open' implies default true. 
+        // Commander handles boolean negation for flags starting with --no. 
+        // If I say .option('--no-open'), the option key becomes 'open' with value false if flag present, true if not.
+        wsPort: parseInt(opts.wsPort, 10),
+        httpPort: parseInt(opts.httpPort, 10),
+    };
 }

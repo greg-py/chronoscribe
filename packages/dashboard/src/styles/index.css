@@ -1,5 +1,5 @@
 /**
- * LogLoom Dashboard - Professional Design System
+ * Chronoscribe Dashboard - Professional Design System
  * Modern, cohesive UI with production-ready styling
  */
 
@@ -1379,6 +1379,7 @@ select:focus-visible {
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
@@ -1403,6 +1404,7 @@ select:focus-visible {
 
 /* Print styles */
 @media print {
+
   .header,
   .filter-bar,
   .alert-panel,

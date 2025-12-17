@@ -1,5 +1,5 @@
 /**
- * @fileoverview Connection manager for LogLoom WebSocket server
+ * @fileoverview Connection manager for Chronoscribe WebSocket server
  * 
  * Handles tracking of connected sources (CLI clients) and viewers (dashboards),
  * manages source color assignment, and provides methods for broadcasting messages.
@@ -13,7 +13,7 @@ import {
     type Source,
     type ServerMessage,
     serializeMessage,
-} from '@logloom/shared';
+} from '@chronoscribe/shared';
 
 /**
  * Represents a connected client (either source or viewer).

@@ -2,7 +2,7 @@
  * @fileoverview Log pattern detection and grouping utilities
  */
 
-import type { LogEntry, LogLevel } from '@logloom/shared';
+import type { LogEntry, LogLevel } from '@chronoscribe/shared';
 
 export interface PatternGroup {
     id: string;

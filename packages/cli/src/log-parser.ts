@@ -5,7 +5,7 @@
  * common patterns from various frameworks and log formats.
  */
 
-import { LogLevel } from '@logloom/shared';
+import { LogLevel } from '@chronoscribe/shared';
 
 /**
  * Result of parsing a log line.

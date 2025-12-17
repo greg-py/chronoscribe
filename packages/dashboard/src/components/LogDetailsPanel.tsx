@@ -3,7 +3,7 @@
  */
 
 import { useCallback, useEffect } from "react";
-import type { LogEntry } from "@logloom/shared";
+import type { LogEntry } from "@chronoscribe/shared";
 import { formatDetailTimestamp } from "../utils/timeUtils";
 import { useLogStore } from "../hooks/useLogStore";
 import {

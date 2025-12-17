@@ -1,8 +1,8 @@
 {
-    "name": "@logloom/dashboard",
+    "name": "@chronoscribe/dashboard",
     "version": "0.1.0",
     "private": true,
-    "description": "LogLoom web dashboard for viewing logs",
+    "description": "Chronoscribe web dashboard for viewing logs",
     "type": "module",
     "scripts": {
         "dev": "vite --port 3211",
@@ -11,7 +11,7 @@
         "clean": "rm -rf dist"
     },
     "dependencies": {
-        "@logloom/shared": "*",
+        "@chronoscribe/shared": "*",
         "@tanstack/react-virtual": "^3.0.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",

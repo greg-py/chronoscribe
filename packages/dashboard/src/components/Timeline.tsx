@@ -146,7 +146,7 @@ export function Timeline() {
           <h2 className="timeline__empty-title">No logs yet</h2>
           <p className="timeline__empty-text">Connect a source with:</p>
           <code className="timeline__empty-code">
-            npm start | npx logloom --name myapp
+            npm start | npx chronoscribe --name myapp
           </code>
         </div>
       </div>

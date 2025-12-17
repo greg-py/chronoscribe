@@ -1,12 +1,14 @@
 /**
- * @fileoverview LogLoom WebSocket server entry point
+ * @fileoverview Chronoscribe WebSocket server entry point
  * 
  * Starts the WebSocket server that receives logs from CLI clients
  * and broadcasts them to dashboard viewers.
  */
 
+
 import { randomUUID } from 'node:crypto';
 import { WebSocketServer, type WebSocket } from 'ws';
+import path from 'node:path';
 import {
     MessageType,
     ClientType,
@@ -15,29 +17,52 @@ import {
     isMessageType,
     type SourceRegisterMessage,
     type LogMessage,
-} from '@logloom/shared';
+} from '@chronoscribe/shared';
 import { ConnectionManager } from './connection-manager.js';
 import { LogBroadcaster } from './log-broadcaster.js';
+import { startStaticServer } from './static-server.js';
 
 // Server version
 const VERSION = '0.1.0';
 
 /**
- * Start the LogLoom WebSocket server.
+ * Options for starting the server.
  */
-function startServer(port: number = SERVER_DEFAULTS.WS_PORT): void {
+export interface ServerOptions {
+    wsPort?: number;
+    httpPort?: number;
+    dashboardPath?: string;
+}
+
+/**
+ * Start the Chronoscribe WebSocket server and optional static dashboard server.
+ */
+export function startServer(options: ServerOptions = {}): void {
+    const {
+        wsPort = SERVER_DEFAULTS.WS_PORT,
+        httpPort = 3211,
+        dashboardPath
+    } = options;
+
     const connectionManager = new ConnectionManager();
     const logBroadcaster = new LogBroadcaster(connectionManager);
 
-    const wss = new WebSocketServer({ port });
+    const wss = new WebSocketServer({ port: wsPort });
 
     console.log(`
 ╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
-║   🪵 LogLoom Server v${VERSION}                              ║
+║   🪵 Chronoscribe Server v${VERSION}                          ║
 ║                                                           ║
-║   WebSocket server running on ws://localhost:${port}        ║
-║                                                           ║
+║   WebSocket server running on ws://localhost:${wsPort}        ║
+`);
+
+    if (dashboardPath) {
+        startStaticServer(dashboardPath, httpPort);
+        console.log(`║   Dashboard running on http://localhost:${httpPort}             ║`);
+    }
+
+    console.log(`║                                                           ║
 ║   Waiting for connections...                              ║
 ║                                                           ║
 ╚═══════════════════════════════════════════════════════════╝
@@ -156,9 +181,5 @@ function startServer(port: number = SERVER_DEFAULTS.WS_PORT): void {
     });
 }
 
-// Start the server
-const port = process.env['LOGLOOM_PORT']
-    ? parseInt(process.env['LOGLOOM_PORT'], 10)
-    : SERVER_DEFAULTS.WS_PORT;
-
-startServer(port);
+// Auto-start check removed for bundling compatibility
+// The CLI is now the primary entry point.

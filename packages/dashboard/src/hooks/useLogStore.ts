@@ -18,7 +18,7 @@ import {
   DEFAULT_FILTER,
   DEFAULT_ALERT_CONFIG,
   MAX_LOG_ENTRIES,
-} from "@logloom/shared";
+} from "@chronoscribe/shared";
 import type { PatternGroup } from "../utils/patternUtils";
 import type { TimeDisplayMode } from "../utils/timeUtils";
 import { detectPattern } from "../utils/patternUtils";
@@ -97,7 +97,7 @@ interface LogStoreState {
  */
 function loadBookmarksFromStorage(): Map<string, Bookmark> {
   try {
-    const stored = localStorage.getItem("logloom:bookmarks");
+    const stored = localStorage.getItem("chronoscribe:bookmarks");
     if (stored) {
       const parsed = JSON.parse(stored) as Array<[string, Bookmark]>;
       return new Map(parsed);
@@ -114,7 +114,7 @@ function loadBookmarksFromStorage(): Map<string, Bookmark> {
 function saveBookmarksToStorage(bookmarks: Map<string, Bookmark>): void {
   try {
     const bookmarksArray = Array.from(bookmarks.entries());
-    localStorage.setItem("logloom:bookmarks", JSON.stringify(bookmarksArray));
+    localStorage.setItem("chronoscribe:bookmarks", JSON.stringify(bookmarksArray));
   } catch (e) {
     console.error("Failed to save bookmarks:", e);
   }

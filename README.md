@@ -1,4 +1,4 @@
-# LogLoom 🪵
+# Chronoscribe 🪵
 
 > A Unified Local-Dev Log Aggregator
 
@@ -6,7 +6,7 @@
 
 **The Solution**: A lightweight web-based dashboard that aggregates logs from multiple local sources into a single, filterable timeline.
 
-![LogLoom Architecture](https://via.placeholder.com/800x300/161b22/58a6ff?text=Frontend+%7C+Backend+%7C+Database+→+LogLoom+Dashboard)
+![Chronoscribe Architecture](https://via.placeholder.com/800x300/161b22/58a6ff?text=Frontend+%7C+Backend+%7C+Database+→+Chronoscribe+Dashboard)
 
 ## ✨ Features
 
@@ -19,68 +19,56 @@
 
 ## 🚀 Quick Start
 
-### 1. Install Dependencies
+### 1. Run with npx (No Installation Required)
+
+Start the dashboard server:
 
 ```bash
-cd LogLoom
-npm install
+npx chronoscribe --serve
+# Opens http://localhost:3211
 ```
 
-### 2. Start the Server and Dashboard
+### 2. Pipe Your Logs
+
+In other terminal windows, pipe your application logs to Chronoscribe:
 
 ```bash
-npm run dev
+# Frontend
+npm start | npx chronoscribe --name frontend
+
+# Docker container
+docker logs -f db | npx chronoscribe --name database --color "#FF6B6B"
 ```
 
-This starts:
-- WebSocket server on `ws://localhost:3210`
-- Dashboard on `http://localhost:3211`
+### 3. Watch Logs Flow
 
-### 3. Pipe Your Logs
+Go to the dashboard and see your logs aggregated in real-time!
 
-**Option A: Run from anywhere (Recommended)**
+---
 
-Run `npm link` once in the cli package to make the `logloom` command available globally:
+## 📦 Installation (Optional)
+
+You can install Chronoscribe globally for easier access:
+
 ```bash
-cd packages/cli
-npm link
+npm install -g chronoscribe
 ```
 
-Now you can use `logloom` in **any** terminal window:
+Then use it directly:
 ```bash
-# In your app's project folder
-npm start | logloom --name my-app
-```
-
-**Option B: Use without linking**
-
-From the LogLoom directory:
-```bash
-npm run start:frontend | npx ./packages/cli --name frontend
-```
-
-### 4. Open the Dashboard
-
-Navigate to [http://localhost:3211](http://localhost:3211) and watch your logs flow in!
-
-## 📦 Project Structure
-
-```
-LogLoom/
-├── packages/
-│   ├── shared/      # Shared types and WebSocket protocol
-│   ├── server/      # WebSocket server for log aggregation
-│   ├── cli/         # CLI tool for piping logs
-│   └── dashboard/   # React web dashboard
+chronoscribe --serve
+npm start | chronoscribe --name my-app
 ```
 
 ## 🛠️ CLI Usage
 
 ```bash
-npx logloom [options]
+chronoscribe [options]
 
 Options:
-  -n, --name <name>        Source identifier (required)
+  -S, --serve              Start the Chronoscribe server and dashboard
+  --no-open                Do not open the dashboard in the browser automatically
+  -n, --name <name>        Source identifier (required for piping)
   -s, --server <url>       Server URL (default: ws://localhost:3210)
   -c, --color <color>      Preferred badge color (CSS value)
   --level-pattern <regex>  Custom log level detection pattern
@@ -91,14 +79,13 @@ Options:
 ### Examples
 
 ```bash
-# Basic usage
-npm start | npx logloom --name myapp
+# Start server
+chronoscribe --serve
 
-# Custom server and color
-docker logs -f redis | npx logloom -n redis -c "#FF6B6B" -s ws://192.168.1.100:3210
-
-# Watch a log file
-tail -f /var/log/app.log | npx logloom --name logfile
+# Pipe logs
+npm start | chronoscribe -n frontend
+docker logs -f redis | chronoscribe -n redis -c "#FF6B6B"
+tail -f /var/log/app.log | chronoscribe -n backend
 ```
 
 ## 🎮 Dashboard Features
@@ -125,23 +112,25 @@ tail -f /var/log/app.log | npx logloom --name logfile
 
 ## 🔧 Development
 
+### Project Structure
+
+```
+chronoscribe/
+├── packages/
+│   ├── shared/      # Shared types and WebSocket protocol
+│   ├── server/      # WebSocket + Static Asset Server
+│   ├── cli/         # CLI tool for piping logs & starting server
+│   └── dashboard/   # React web dashboard
+```
+
 ### Building
 
 ```bash
 # Build all packages
 npm run build
-
-# Build specific package
-npm run build -w @logloom/server
 ```
 
-### Package Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start server + dashboard in dev mode |
-| `npm run build` | Build all packages |
-| `npm run clean` | Clean all build outputs |
+The build process bundles the React dashboard into the Server package, which is then utilized by the CLI to provide a standalone experience.
 
 ## 📄 License
 

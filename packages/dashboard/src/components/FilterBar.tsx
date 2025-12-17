@@ -3,7 +3,7 @@
  */
 
 import { useState } from "react";
-import { LogLevel } from "@logloom/shared";
+import { LogLevel } from "@chronoscribe/shared";
 import {
   useLogStore,
   useUniqueSourceNames,
@@ -165,9 +165,8 @@ export function FilterBar() {
         {LEVELS.map(({ level, label }) => (
           <button
             key={level}
-            className={`level-badge level-badge--${level.toLowerCase()} ${
-              filter.minLevel === level ? "level-badge--active" : ""
-            }`}
+            className={`level-badge level-badge--${level.toLowerCase()} ${filter.minLevel === level ? "level-badge--active" : ""
+              }`}
             onClick={() => setMinLevel(level)}
             title={`Show ${level} and above`}
           >
@@ -192,9 +191,8 @@ export function FilterBar() {
 
       {/* Bookmarks Filter */}
       <button
-        className={`toggle-button ${
-          showBookmarksOnly ? "toggle-button--active" : ""
-        }`}
+        className={`toggle-button ${showBookmarksOnly ? "toggle-button--active" : ""
+          }`}
         onClick={() => setShowBookmarksOnly(!showBookmarksOnly)}
         title={
           showBookmarksOnly ? "Show all logs" : "Show only bookmarked logs"

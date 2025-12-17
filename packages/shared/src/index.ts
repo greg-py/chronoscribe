@@ -1,5 +1,5 @@
 /**
- * @fileoverview Public API for @logloom/shared package
+ * @fileoverview Public API for @chronoscribe/shared package
  * 
  * Re-exports all types, constants, and utilities needed by other packages.
  */

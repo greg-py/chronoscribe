@@ -1,5 +1,5 @@
 /**
- * @fileoverview WebSocket message protocol for LogLoom
+ * @fileoverview WebSocket message protocol for Chronoscribe
  * 
  * Defines the message types and structures used for communication between
  * CLI clients, the server, and dashboard viewers. All messages are JSON-encoded.

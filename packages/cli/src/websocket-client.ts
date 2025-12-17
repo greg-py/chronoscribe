@@ -1,7 +1,7 @@
 /**
- * @fileoverview WebSocket client for LogLoom CLI
+ * @fileoverview WebSocket client for Chronoscribe CLI
  * 
- * Manages the WebSocket connection to the LogLoom server with
+ * Manages the WebSocket connection to the Chronoscribe server with
  * automatic reconnection and message buffering.
  */
 
@@ -14,7 +14,7 @@ import {
     serializeMessage,
     type WelcomeMessage,
     isMessageType,
-} from '@logloom/shared';
+} from '@chronoscribe/shared';
 import type { ParsedLog } from './log-parser.js';
 
 /**
@@ -79,7 +79,7 @@ export class WebSocketClient {
                 this.ws = new WebSocket(this.serverUrl);
 
                 this.ws.on('open', () => {
-                    console.log(`[LogLoom] Connected to ${this.serverUrl}`);
+                    console.log(`[Chronoscribe] Connected to ${this.serverUrl}`);
                     this.reconnectAttempts = 0;
 
                     // Register as a source
@@ -97,7 +97,7 @@ export class WebSocketClient {
                     if (isMessageType<WelcomeMessage>(message, MessageType.WELCOME)) {
                         this.isConnected = true;
                         this.assignedColor = message.payload.color;
-                        console.log(`[LogLoom] Registered as "${this.sourceName}" (color: ${this.assignedColor})`);
+                        console.log(`[Chronoscribe] Registered as "${this.sourceName}" (color: ${this.assignedColor})`);
 
                         // Send any buffered messages
                         this.flushBuffer();
@@ -105,7 +105,7 @@ export class WebSocketClient {
                     }
 
                     if (message.type === MessageType.ERROR) {
-                        console.error(`[LogLoom] Server error: ${message.payload.message}`);
+                        console.error(`[Chronoscribe] Server error: ${message.payload.message}`);
                     }
                 });
 
@@ -121,7 +121,7 @@ export class WebSocketClient {
                         // Connection failed
                         reject(error);
                     } else {
-                        console.error(`[LogLoom] WebSocket error: ${error.message}`);
+                        console.error(`[Chronoscribe] WebSocket error: ${error.message}`);
                     }
                 });
 
@@ -136,14 +136,14 @@ export class WebSocketClient {
      */
     private attemptReconnect(): void {
         if (this.reconnectAttempts >= this.reconnectConfig.maxAttempts) {
-            console.error('[LogLoom] Max reconnection attempts reached. Exiting.');
+            console.error('[Chronoscribe] Max reconnection attempts reached. Exiting.');
             process.exit(1);
         }
 
         const delay = this.reconnectConfig.baseDelayMs * Math.pow(2, this.reconnectAttempts);
         this.reconnectAttempts++;
 
-        console.log(`[LogLoom] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.reconnectConfig.maxAttempts})...`);
+        console.log(`[Chronoscribe] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.reconnectConfig.maxAttempts})...`);
 
         setTimeout(() => {
             this.connect().catch(() => {
@@ -182,7 +182,7 @@ export class WebSocketClient {
     private flushBuffer(): void {
         if (this.messageBuffer.length === 0) return;
 
-        console.log(`[LogLoom] Sending ${this.messageBuffer.length} buffered messages...`);
+        console.log(`[Chronoscribe] Sending ${this.messageBuffer.length} buffered messages...`);
 
         for (const message of this.messageBuffer) {
             if (this.ws?.readyState === WebSocket.OPEN) {

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Log broadcaster for LogLoom server
+ * @fileoverview Log broadcaster for Chronoscribe server
  * 
  * Handles processing incoming logs from sources, maintaining a buffer
  * of recent logs for new connections, and broadcasting to viewers.
@@ -12,7 +12,7 @@ import {
     SERVER_DEFAULTS,
     type LogEntry,
     type LogMessage,
-} from '@logloom/shared';
+} from '@chronoscribe/shared';
 import type { ConnectionManager } from './connection-manager.js';
 
 /**

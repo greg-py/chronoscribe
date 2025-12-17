@@ -1,11 +1,11 @@
 /**
- * @fileoverview Main LogLoom Dashboard Application
+ * @fileoverview Main Chronoscribe Dashboard Application
  * 
  * Orchestrates the WebSocket connection and renders the log viewer UI.
  */
 
 import { useCallback, useRef } from 'react';
-import { MessageType, type ServerMessage } from '@logloom/shared';
+import { MessageType, type ServerMessage } from '@chronoscribe/shared';
 import { useWebSocket, type ConnectionStatus } from './hooks/useWebSocket';
 import { useLogStore, useSelectedLog } from './hooks/useLogStore';
 import { FilterBar } from './components/FilterBar';
@@ -70,7 +70,7 @@ function App() {
                         }
                         if (alertConfig.showNotification) {
                             showNotification(
-                                `LogLoom Alert: ${log.source}`,
+                                `Chronoscribe Alert: ${log.source}`,
                                 log.content.slice(0, 100)
                             );
                         }
@@ -120,7 +120,7 @@ function App() {
         <div className="app">
             {/* Header */}
             <header className="header">
-                <h1 className="header__title">LogLoom</h1>
+                <h1 className="header__title">Chronoscribe</h1>
                 <div className="header__status">
                     <span className={`status-indicator ${status === 'connected' ? 'status-indicator--connected' : ''}`} />
                     <span>{getStatusText(status, reconnectAttempts)}</span>
@@ -151,7 +151,7 @@ function App() {
                     <span>{logs.length.toLocaleString()} logs</span>
                 </div>
                 <div>
-                    <span>LogLoom v0.1.0</span>
+                    <span>Chronoscribe v0.1.0</span>
                 </div>
             </footer>
 

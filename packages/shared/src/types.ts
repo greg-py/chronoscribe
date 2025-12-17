@@ -1,7 +1,7 @@
 /**
- * @fileoverview Core type definitions for LogLoom
+ * @fileoverview Core type definitions for Chronoscribe
  * 
- * This module defines the fundamental types used across all LogLoom packages
+ * This module defines the fundamental types used across all Chronoscribe packages
  * for representing log entries, sources, and filter configurations.
  */
 

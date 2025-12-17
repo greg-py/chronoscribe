@@ -1,7 +1,7 @@
 /**
- * @fileoverview WebSocket hook for LogLoom Dashboard
+ * @fileoverview WebSocket hook for Chronoscribe Dashboard
  * 
- * Custom React hook for managing WebSocket connection to the LogLoom server
+ * Custom React hook for managing WebSocket connection to the Chronoscribe server
  * with automatic reconnection and message handling.
  */
 
@@ -10,7 +10,7 @@ import {
     SERVER_DEFAULTS,
     parseMessage,
     type ServerMessage,
-} from '@logloom/shared';
+} from '@chronoscribe/shared';
 
 /**
  * Connection status for the WebSocket.

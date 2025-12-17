@@ -1,21 +1,35 @@
 {
-  "name": "logloom",
+  "name": "chronoscribe",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "description": "A unified local-dev log aggregator",
+  "bin": {
+    "chronoscribe": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently -n server,dashboard -c blue,green \"npm run dev -w @logloom/server\" \"npm run dev -w @logloom/dashboard\"",
-    "build": "npm run build --workspaces",
-    "clean": "npm run clean --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
-    "lint": "eslint . --ext .ts,.tsx"
+    "dev": "concurrently -n server,dashboard -c blue,green \"npm run dev -w @chronoscribe/server\" \"npm run dev -w @chronoscribe/dashboard\"",
+    "build:packages": "npm run build -w @chronoscribe/shared && npm run build -w @chronoscribe/server && npm run build -w @chronoscribe/dashboard",
+    "build": "npm run build:packages && tsup",
+    "prepublishOnly": "npm run build",
+    "clean": "npm run clean --workspaces && rm -rf dist",
+    "test": "npm run test --workspaces"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "ws": "^8.14.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
     "concurrently": "^8.2.2",
+    "tsup": "^8.0.1",
     "typescript": "^5.3.3"
   },
   "engines": {
@@ -23,8 +37,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/logloom"
+    "url": "https://github.com/YOUR_USERNAME/chronoscribe"
   },
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/chronoscribe/issues"
+  },
+  "homepage": "https://github.com/YOUR_USERNAME/chronoscribe#readme",
   "keywords": [
     "logging",
     "developer-tools",
@@ -32,6 +50,6 @@
     "websocket",
     "cli"
   ],
-  "author": "",
+  "author": "Greg King",
   "license": "MIT"
 }

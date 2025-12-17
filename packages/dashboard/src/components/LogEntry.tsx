@@ -3,7 +3,7 @@
  */
 
 import { memo, useCallback, useState } from "react";
-import type { LogEntry } from "@logloom/shared";
+import type { LogEntry } from "@chronoscribe/shared";
 import { highlightText } from "../utils/filter";
 import {
   isMultiLine,
@@ -94,9 +94,8 @@ export const LogEntryRow = memo(function LogEntryRow({
       onClick={handleClick}
     >
       <button
-        className={`log-entry__bookmark ${
-          isBookmarked ? "log-entry__bookmark--active" : ""
-        }`}
+        className={`log-entry__bookmark ${isBookmarked ? "log-entry__bookmark--active" : ""
+          }`}
         onClick={handleBookmarkToggle}
         title={isBookmarked ? "Remove bookmark" : "Add bookmark"}
       >
@@ -134,9 +133,8 @@ export const LogEntryRow = memo(function LogEntryRow({
             {stackTraceLines.map((line, i) => (
               <div
                 key={i}
-                className={`stack-trace-line ${
-                  line.isError ? "stack-trace-line--error" : ""
-                } ${line.isFrame ? "stack-trace-line--frame" : ""}`}
+                className={`stack-trace-line ${line.isError ? "stack-trace-line--error" : ""
+                  } ${line.isFrame ? "stack-trace-line--frame" : ""}`}
                 style={{ paddingLeft: `${line.indent * 12}px` }}
               >
                 {line.text}

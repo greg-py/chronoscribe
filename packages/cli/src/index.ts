@@ -1,18 +1,49 @@
 #!/usr/bin/env node
 /**
- * @fileoverview LogLoom CLI entry point
+ * @fileoverview Chronoscribe CLI entry point
  * 
- * Pipes stdin logs to the LogLoom server for unified viewing.
+ * Pipes stdin logs to the Chronoscribe server for unified viewing.
+ * Can also start the server itself.
  * 
  * Usage:
- *   npm start | logloom --name frontend
- *   docker logs -f db | logloom --name database
+ *   chronoscribe --serve
+ *   npm start | chronoscribe --name frontend
  */
 
 import { parseArgs } from './cli.js';
 import { readStdin } from './stdin-reader.js';
 import { parseLogLine } from './log-parser.js';
 import { WebSocketClient } from './websocket-client.js';
+import { startServer } from '@chronoscribe/server';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import { exec } from 'node:child_process';
+
+/**
+ * Open URL in default browser.
+ */
+function openBrowser(url: string): void {
+    const start = (process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open');
+    exec(`${start} ${url}`);
+}
+
+/**
+ * Find the dashboard directory.
+ */
+function getDashboardPath(): string {
+    // Current location: packages/cli/dist/index.js (or similar)
+    // Target: packages/server/dist/dashboard
+
+    const currentDir = __dirname;
+
+    // Check standard monorepo build structure
+    const monorepoPath = path.resolve(currentDir, '../../server/dist/dashboard');
+
+    // In a bundled scenario, it might be different. 
+    // Ideally we'd package dashboard assets *with* the CLI or inside the server pkg.
+    // For now, assume monorepo structure as per plan.
+    return monorepoPath;
+}
 
 /**
  * Main entry point.
@@ -21,9 +52,35 @@ async function main(): Promise<void> {
     // Parse command line arguments
     const options = parseArgs();
 
+    // Handle Server Mode
+    if (options.serve) {
+        console.log('[Chronoscribe] Starting server...');
+
+        try {
+            startServer({
+                wsPort: options.wsPort,
+                httpPort: options.httpPort,
+                dashboardPath: getDashboardPath(),
+            });
+
+            if (options.open) {
+                setTimeout(() => {
+                    openBrowser(`http://localhost:${options.httpPort}`);
+                }, 1000);
+            }
+
+            // Keep process alive
+            return;
+        } catch (error: any) {
+            console.error('[Chronoscribe] Failed to start server:', error.message);
+            process.exit(1);
+        }
+    }
+
+    // Client/Pipe Mode
     console.log(`
 ┌─────────────────────────────────────┐
-│  🪵 LogLoom CLI                     │
+│  🪵 Chronoscribe CLI                     │
 │                                     │
 │  Source: ${options.name.padEnd(26)}│
 │  Server: ${options.server.padEnd(26)}│
@@ -42,9 +99,9 @@ async function main(): Promise<void> {
         await client.connect();
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        console.error(`[LogLoom] Failed to connect to server: ${message}`);
-        console.error('[LogLoom] Make sure the LogLoom server is running.');
-        console.error('[LogLoom] Start it with: npm run dev -w @logloom/server');
+        console.error(`[Chronoscribe] Failed to connect to server: ${message}`);
+        console.error('[Chronoscribe] Make sure the Chronoscribe server is running.');
+        console.error(`[Chronoscribe] Start it with: chronoscribe --serve`);
         process.exit(1);
     }
 
@@ -62,7 +119,7 @@ async function main(): Promise<void> {
         () => {
             // stdin closed (Ctrl+D or pipe ended)
             const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-            console.log(`\n[LogLoom] Processed ${logCount} logs in ${duration}s`);
+            console.log(`\n[Chronoscribe] Processed ${logCount} logs in ${duration}s`);
             client.close();
             process.exit(0);
         }
@@ -70,7 +127,7 @@ async function main(): Promise<void> {
 
     // Handle graceful shutdown
     process.on('SIGTERM', () => {
-        console.log('\n[LogLoom] Shutting down...');
+        console.log('\n[Chronoscribe] Shutting down...');
         cleanup();
         client.close();
         process.exit(0);
@@ -79,6 +136,6 @@ async function main(): Promise<void> {
 
 // Run the CLI
 main().catch((error) => {
-    console.error('[LogLoom] Fatal error:', error);
+    console.error('[Chronoscribe] Fatal error:', error);
     process.exit(1);
 });
