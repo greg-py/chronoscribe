@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+          
+      - run: npm ci
+      - run: npm run build
+      
+      # Zip the source code or build output if needed
+      # For now, just creating the release is enough as the primary artifact is on npm
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/index.js
+          generate_release_notes: true
