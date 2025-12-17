@@ -2,7 +2,7 @@ name: Deploy Docs
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
 permissions:
   contents: read
@@ -24,6 +24,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run docs:build
+      - name: Add .nojekyll file
+        run: touch docs/.vitepress/dist/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs/.vitepress/dist
